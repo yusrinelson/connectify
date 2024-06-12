@@ -1,27 +1,69 @@
 import { Avatar } from "@mui/material";
-import userImage from "../../assets/images/user.svg";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
 import SellIcon from "@mui/icons-material/Sell";
 import VideoCameraFrontIcon from "@mui/icons-material/VideoCameraFront";
-import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
-import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline";
-import ReplyIcon from "@mui/icons-material/Reply";
-import screenshotImage from "../../assets/images/screenshot.png"
+import Posts from "./Posts";
+import {
+  collection,
+  serverTimestamp,
+  addDoc,
+  query,
+  onSnapshot,
+  orderBy,
+} from "firebase/firestore";
+import { db } from "../firebase/firebase";
+import { useSelector } from "react-redux";
+import { selectUser } from "../../features/userSlice";
+import "../../index.css";
 
 const Feed = () => {
   const [selectedStory, setSelectedStory] = useState(Array(10).fill(false));
+  const [input, setInput] = useState("");
+  const user = useSelector(selectUser);
+  const [posts, setPosts] = useState([]);
+
+  useEffect(() => {
+    const q = query(collection(db, "posts"), orderBy("timestamp", "desc"));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const postsData = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        data: doc.data(),
+      }));
+      console.log("Fetched posts:", postsData);
+      setPosts(postsData);
+    });
+    return () => {
+      unsubscribe();
+    };
+  }, []);
 
   const handleStoryClick = (index) => {
     const updatedSelectedStory = [...selectedStory];
     updatedSelectedStory[index] = !updatedSelectedStory[index];
     setSelectedStory(updatedSelectedStory);
   };
-  // style={{ "-ms-overflow-style": "none", "scrollbar-width": "none" }}
+
+  const sendPost = async (e) => {
+    e.preventDefault();
+    if (!input.trim() || !user) return;
+    try {
+      await addDoc(collection(db, "posts"), {
+        name: user.displayName,
+        description: user.email,
+        message: input,
+        photoUrl: user.photoUrl || "",
+        timestamp: serverTimestamp(),
+      });
+      setInput("");
+    } catch (error) {
+      console.error("Error adding document: ", error);
+    }
+  };
 
   return (
-    <div className="md:basis-1/2 basis-full border-r-0 md:border-r border-l   border-gray-300 md:max-w-[55%] max-w-full mb-20 ">
-      <div className="flex flex-row items-center justify-start py-4 px-5 overflow-x-auto mb-10">
+    <div className="md:basis-1/2 basis-full border-r-0 md:border-r border-l   border-gray-300 md:max-w-[55%] max-w-full">
+      <div className="flex flex-row items-center justify-start py-4 sm:mx-5 overflow-x-auto no-scrollbar mb-10 border-b">
         {[...Array(10)].map((_, index) => (
           <Avatar
             key={index}
@@ -44,13 +86,20 @@ const Feed = () => {
           />
         ))}
       </div>
-      <div className="flex items-center">
-        <Avatar src={userImage} className="ml-4" />
-        <input
-          type="text"
-          placeholder="What's on your mind?"
-          className="border-2 rounded-md p-2 mx-4 w-full focus:outline-none"
-        />
+      <div className="flex items-center w-[95%]">
+        <Avatar src={user.photoUrl} className="mx-4" />
+        <form className="w-full">
+          <input
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            type="text"
+            placeholder="What's on your mind?"
+            className="border-2 rounded-md p-2 w-full focus:outline-none"
+          />
+          <button className="hidden" onClick={sendPost} type="submit">
+            send
+          </button>
+        </form>
       </div>
       <div className="flex justify-between items-center px-4 lg:px-20 py-4">
         <div>
@@ -100,29 +149,15 @@ const Feed = () => {
           <span className="text-gray-500 ml-2 hidden sm:inline">Live</span>
         </div>
       </div>
-      <div className="bg-gray-100 mx-6 p-4 rounded-md mb-4">
-        <div className="flex">
-          <Avatar
-            src={userImage}
-            sx={{ width: 45, height: 45 }}
-            className="mr-2 cursor-pointer"
-          />
-          <div className="mb-7">
-            <h2 className="text-sm font-bold">Yusri Nelson</h2>
-            <h4 className="text-xs font-semibold">yusrinelson@gmail.com</h4>
-          </div>
-        </div>
-        <img
-          src={screenshotImage}
-          alt=""
-          className="w-full object-contain h-fit rounded-md"
+      {posts.map(({ id, data: { name, description, message, photoUrl } }) => (
+        <Posts
+          key={id}
+          name={name}
+          description={description}
+          message={message}
+          photoUrl={photoUrl}
         />
-        <ul className="flex gap-5 mt-4 text-gray-600">
-          <li><FavoriteBorderIcon/></li>
-          <li><ChatBubbleOutlineIcon/></li>
-          <li><ReplyIcon className="scale-x-[-1]"/></li>
-        </ul>
-      </div>
+      ))}
     </div>
   );
 };

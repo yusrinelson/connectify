@@ -4,27 +4,27 @@ const RightSide = () => {
   const contacts = [
     {
       id: 1,
-      name: "Yusri Nelson",
+      name: "Jane Doe",
       src:userImage,
     },
     {
       id: 2,
-      name: "Rhowan Jantjies",
+      name: "John Smith",
       src:userImage,
     },
     {
       id: 3,
-      name: "Diego Jeftha",
+      name: "Richard Roe",
       src:userImage,
     },
     {
       id: 4,
-      name: "Bryan Williams",
+      name: "Susan White",
       src:userImage,
     },
     {
       id: 5,
-      name: "Kiyaam Petersen",
+      name: "Michael Miller",
       src:userImage,
     },
   ]

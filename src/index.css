@@ -4,14 +4,29 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Merienda:wght@300..900&display=swap');
 
+*{
+  margin: 0;
+  padding: 0;
+}
 
 body{
+  padding: 0;
   margin: 0;
   height: 100%;
-  /* width: 100%; */
+  width: 100%;
 }
 .header__title {
   font-family: "Merienda", cursive;
   font-optical-sizing: auto;
   font-style: normal;
+}
+
+/* In your CSS file or within a <style> tag */
+.no-scrollbar::-webkit-scrollbar {
+  display: none; /* For WebKit browsers */
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none; /* For Internet Explorer and Edge */
+  scrollbar-width: none; /* For Firefox */
 }
