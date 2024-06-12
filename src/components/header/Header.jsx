@@ -41,7 +41,7 @@ const Header = () => {
     <div className="flex py-5 bg-white border-b items-center justify-start sticky top-0 z-50">
       <div className="basis-1/4">
         <h1
-          className="header__title sm:text-2xl ml-3 text-gray-600"
+          className="header__title text-2xl md:text-3xl ml-3 text-gray-600"
           style={layout.textGradient}
         >
           Connectify
