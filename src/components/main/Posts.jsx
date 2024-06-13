@@ -1,11 +1,14 @@
-import { Avatar } from "@mui/material";
+import { Avatar, CircularProgress } from "@mui/material";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline";
 import ReplyIcon from "@mui/icons-material/Reply";
 // import screenshotImage from "../../assets/images/screenshot.png";
-import PropTypes from "prop-types"
+import PropTypes from "prop-types";
+import { useState } from "react";
 
-const Posts = ({ name, description, message, photoUrl }) => {
+const Posts = ({ name, description, message, photoUrl, imageUrl }) => {
+  const [loading, setLoading] = useState(true);
+
   return (
     <div>
       <div className="bg-gray-100 mx-6 p-4 rounded-md mb-4">
@@ -20,14 +23,26 @@ const Posts = ({ name, description, message, photoUrl }) => {
             <h4 className="text-xs font-semibold">{description}</h4>
           </div>
         </div>
-        {/* post body below */}
-        {/* <img
-          src={screenshotImage}
-          alt=""
-          className="w-full object-contain h-fit rounded-md"
-        /> */}
         <div>
-          <p>{message}</p>
+          <p className="mb-6 ml-3">{message}</p>
+          {imageUrl && (
+            <div className="flex justify-center items-center w-full h-full">
+              {loading && (
+                <div className="flex justify-center items-center w-full h-full">
+                  <CircularProgress />
+                </div>
+              )}
+              <img
+                src={imageUrl}
+                alt=""
+                className={`w-full object-contain h-fit rounded-md ${
+                  loading ? "hidden" : ""
+                }`}
+                onLoad={() => setLoading(false)}
+                onError={() => setLoading(false)}
+              />
+            </div>
+          )}
         </div>
         <ul className="flex gap-5 mt-4 text-gray-600">
           <li>
@@ -45,9 +60,10 @@ const Posts = ({ name, description, message, photoUrl }) => {
   );
 };
 Posts.propTypes = {
-    name: PropTypes.string,
-    description: PropTypes.string,
-    message: PropTypes.string,
-    photoUrl: PropTypes.string,
-  }
+  name: PropTypes.string,
+  description: PropTypes.string,
+  message: PropTypes.string,
+  photoUrl: PropTypes.string,
+  imageUrl: PropTypes.string,
+};
 export default Posts;

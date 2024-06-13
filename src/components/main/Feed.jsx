@@ -1,13 +1,8 @@
 import { Avatar } from "@mui/material";
 import { useEffect, useState } from "react";
-import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
-import SellIcon from "@mui/icons-material/Sell";
-import VideoCameraFrontIcon from "@mui/icons-material/VideoCameraFront";
 import Posts from "./Posts";
 import {
   collection,
-  serverTimestamp,
-  addDoc,
   query,
   onSnapshot,
   orderBy,
@@ -16,11 +11,13 @@ import { db } from "../firebase/firebase";
 import { useSelector } from "react-redux";
 import { selectUser } from "../../features/userSlice";
 import "../../index.css";
+import Modal from "./Modal";
 
 const Feed = () => {
+  //stories state
   const [selectedStory, setSelectedStory] = useState(Array(10).fill(false));
-  const [input, setInput] = useState("");
   const user = useSelector(selectUser);
+  //posting states
   const [posts, setPosts] = useState([]);
 
   useEffect(() => {
@@ -38,27 +35,11 @@ const Feed = () => {
     };
   }, []);
 
+  /**makes sure only one story is selected */
   const handleStoryClick = (index) => {
     const updatedSelectedStory = [...selectedStory];
     updatedSelectedStory[index] = !updatedSelectedStory[index];
     setSelectedStory(updatedSelectedStory);
-  };
-
-  const sendPost = async (e) => {
-    e.preventDefault();
-    if (!input.trim() || !user) return;
-    try {
-      await addDoc(collection(db, "posts"), {
-        name: user.displayName,
-        description: user.email,
-        message: input,
-        photoUrl: user.photoUrl || "",
-        timestamp: serverTimestamp(),
-      });
-      setInput("");
-    } catch (error) {
-      console.error("Error adding document: ", error);
-    }
   };
 
   return (
@@ -86,80 +67,24 @@ const Feed = () => {
           />
         ))}
       </div>
-      <div className="flex items-center w-[95%]">
+      <div className="flex items-center justify-center w-[95%] mb-10">
         <Avatar src={user.photoUrl} className="mx-4" />
-        <form className="w-full">
-          <input
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            type="text"
-            placeholder="What's on your mind?"
-            className="border-2 rounded-md p-2 w-full focus:outline-none"
-          />
-          <button className="hidden" onClick={sendPost} type="submit">
-            send
-          </button>
-        </form>
+
+          <Modal/>
+
       </div>
-      <div className="flex justify-between items-center px-4 lg:px-20 py-4">
-        <div>
-          <AddPhotoAlternateIcon
-            sx={{
-              width: "40px",
-              height: "40px",
-              "@media (max-width: 540px)": {
-                width: "30px",
-                height: "30px",
-              },
-            }}
-            className="text-blue-400"
-          />
-          <span className="text-gray-500 ml-2 hidden sm:inline ">
-            Photo/Video
-          </span>
-        </div>
-        <div>
-          <SellIcon
-            sx={{
-              width: "40px",
-              height: "40px",
-              "@media (max-width: 540px)": {
-                width: "30px",
-                height: "30px",
-              },
-            }}
-            className="text-green-400"
-          />
-          <span className="text-gray-500 ml-2 hidden sm:inline">
-            Tag Friends
-          </span>
-        </div>
-        <div>
-          <VideoCameraFrontIcon
-            sx={{
-              width: "40px",
-              height: "40px",
-              "@media (max-width: 540px)": {
-                width: "30px",
-                height: "30px",
-              },
-            }}
-            className="text-red-500"
-          />
-          <span className="text-gray-500 ml-2 hidden sm:inline">Live</span>
-        </div>
-      </div>
-      {posts.map(({ id, data: { name, description, message, photoUrl } }) => (
+      {posts.map(({ id, data: { name, description, message, photoUrl, imageUrl } }) => (
         <Posts
           key={id}
           name={name}
           description={description}
           message={message}
           photoUrl={photoUrl}
+          imageUrl={imageUrl}
         />
       ))}
     </div>
   );
 };
 
-export default Feed;
+export default Feed
